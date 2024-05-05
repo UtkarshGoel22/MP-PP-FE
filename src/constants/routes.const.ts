@@ -1,0 +1,16 @@
+export const ROUTES = {
+  home: "/",
+  signin: "/signin",
+  signup: "/signup",
+  dashboard: "/user/dashboard",
+  userVerify: "/user/verify",
+  notFound: "/not-found",
+  myProfile: "/user/my-profile",
+  createPokerboard: "/create-pokerboard",
+  groups: "/groups",
+  tickets: "/tickets",
+  createGroup: "/create-group",
+  pokerboard: "/pokerboard",
+  pokerboardDetail: "/pokerboard/:id",
+  importTickets: "/pokerboard/:id/import-tickets",
+}

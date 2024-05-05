@@ -1,83 +1,63 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Button } from '@material-ui/core';
-import { RootState } from '../redux/store';
-import { dashboardStyles } from '../styles/style';
-import { Ticket } from '../utils/utils.import.tickets';
-import { CONSTANT, TicketAction } from '../constants/constant';
+import Button from "@mui/material/Button"
+import Typography from "@mui/material/Typography"
 
-export type TicketPropType = {
-  key: string;
-  data: Ticket;
-};
+import CustomCard from "@components/CustomCard"
+import { TEXT } from "@constants/text.const"
+import { useAppDispatch, useAppSelector } from "@src/state/redux/hooks"
+import { ticketActions } from "@src/state/redux/ticketSlice"
+import { TicketData } from "@src/types/shared/ticket"
 
-function JiraTicket(props: TicketPropType) {
-  const { selectedTickets } = useSelector((state: RootState) => state.tickets);
-  const dispatch = useDispatch();
-  const classes = dashboardStyles();
-
-  function handleClick(button: string) {
-    if (button == CONSTANT.select) {
-      let newSelectedTickets: Ticket[] = [...selectedTickets, props.data];
-      dispatch({
-        type: TicketAction.SET_SELECTED_TICKETS,
-        payload: newSelectedTickets,
-      });
-    } else {
-      let newSelectedTickets: Ticket[] = selectedTickets.filter(
-        (ele) => ele.id !== props.data.id
-      );
-      dispatch({
-        type: TicketAction.SET_SELECTED_TICKETS,
-        payload: newSelectedTickets,
-      });
-    }
-  }
-
-  return (
-    <div className="ticket">
-      <div>
-        <p>
-          {CONSTANT.ticketId}
-          {props.data.id}
-        </p>
-        <p>
-          {CONSTANT.ticketType}
-          {props.data.type}
-        </p>
-        <p>
-          {CONSTANT.ticketSummary}
-          {props.data.summary}
-        </p>
-        <p>
-          {CONSTANT.ticketDescription}
-          {props.data.description}
-        </p>
-      </div>
-      <Button
-        variant="contained"
-        color="primary"
-        className={classes.btn}
-        disabled={
-          selectedTickets.find((ele) => ele.id == props.data.id) ? true : false
-        }
-        onClick={() => handleClick(CONSTANT.select)}
-      >
-        {CONSTANT.select}
-      </Button>
-      <Button
-        variant="contained"
-        color="primary"
-        className={classes.btn}
-        disabled={
-          selectedTickets.find((ele) => ele.id == props.data.id) ? false : true
-        }
-        onClick={() => handleClick(CONSTANT.remove)}
-      >
-        {CONSTANT.remove}
-      </Button>
-    </div>
-  );
+export type JiraTicketProps = {
+  key: string
+  data: TicketData
 }
 
-export default JiraTicket;
+function JiraTicket({ data }: JiraTicketProps) {
+  const dispatch = useAppDispatch()
+  const { selectedOptions } = useAppSelector(
+    state => state.ticket.importTickets,
+  )
+
+  function handleSelect() {
+    let newSelectedTickets: TicketData[] = [...selectedOptions, data]
+    dispatch(ticketActions.setSelectedOptions(newSelectedTickets))
+  }
+
+  function handleRemove() {
+    let newSelectedTickets: TicketData[] = selectedOptions.filter(
+      option => option.id !== data.id,
+    )
+    dispatch(ticketActions.setSelectedOptions(newSelectedTickets))
+  }
+
+  const content = (
+    <>
+      <Typography>Id: {data.id}</Typography>
+      <Typography>Type: {data.type}</Typography>
+      <Typography>Summary: {data.summary}</Typography>
+      <Typography>Description: {data.description}</Typography>
+      <Button
+        color="secondary"
+        disabled={
+          selectedOptions?.find(option => option.id == data.id) ? true : false
+        }
+        onClick={handleSelect}
+      >
+        {TEXT.select}
+      </Button>
+      <Button
+        color="secondary"
+        disabled={
+          selectedOptions?.find(option => option.id == data.id) ? false : true
+        }
+        onClick={handleRemove}
+      >
+        {TEXT.remove}
+      </Button>
+    </>
+  )
+
+  return <CustomCard header={data.id} content={content} />
+}
+
+export default JiraTicket

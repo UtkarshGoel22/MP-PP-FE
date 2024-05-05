@@ -1,64 +1,52 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
-import {
-  getGroupSearchOption,
-  setGroupSearchSelectesOptionActionCreator,
-  setSearchGroupError,
-} from '../redux/actions/searchGroupActions';
-import { dashboardStyles } from '../styles/style';
-import { VALUE } from '../constants/finalConstant';
+import { useEffect, useState } from "react"
 
-export type SearchUserOptionType = {
-  name: string;
-  id: string;
-  email: string;
-  userName: string;
-};
+import Autocomplete from "@mui/material/Autocomplete"
+import TextField from "@mui/material/TextField"
 
-function SearchGroup() {
-  const dispatch = useDispatch();
-  const { options, error } = useSelector(
-    (state: RootState) => state.searchGroup
-  );
-  const [inputGroup, setInputGroup] = useState('');
-  const classes = dashboardStyles();
+import { API } from "@constants/api.const"
+import { FIELDS } from "@constants/fields.const"
+import { groupActions } from "@state/redux/groupSlice"
+import { useAppDispatch, useAppSelector } from "@state/redux/hooks"
 
-  /**
-   * Time out of 3 second is added, and fetchResult is only called
-   * when user stops typing (ie, inputGroupMember doesn't change else the timeout is cleared)
-   */
+interface SearchGroupProps {
+  form: any
+  error: string | undefined
+}
+
+function SearchGroup({ form, error }: SearchGroupProps) {
+  const dispatch = useAppDispatch()
+  const { options } = useAppSelector(state => state.group.searchGroup)
+  const [searchInput, setSearchInput] = useState("")
+
   useEffect(() => {
     let timeout = setTimeout(() => {
-      if (inputGroup.length >= 3) dispatch(getGroupSearchOption(inputGroup));
-    }, VALUE.debounceTime);
-    return () => clearTimeout(timeout);
-  }, [inputGroup]);
+      if (searchInput.length >= 3) {
+        dispatch(groupActions.searchGroup(searchInput))
+      }
+    }, API.debounce.groupSearch)
+    return () => clearTimeout(timeout)
+  }, [searchInput])
 
   return (
     <>
       <Autocomplete
-        id="add-group"
-        className={classes.item}
         options={options}
-        getOptionSelected={(option, value) => option.id === value.id}
-        multiple={true}
-        onChange={(e, v) => {
-          dispatch(setSearchGroupError(undefined));
-          dispatch(setGroupSearchSelectesOptionActionCreator(v));
+        isOptionEqualToValue={(option, value) => option.id === value.id}
+        multiple
+        onChange={(_event, value) => {
+          form.setFieldError(FIELDS.groups.name, "")
+          form.setFieldValue(FIELDS.groups.name, value)
         }}
-        getOptionLabel={(option) => `${option.name}`}
-        renderInput={(params) => (
+        getOptionLabel={option => `name: "${option.name}"`}
+        renderInput={params => (
           <TextField
-            onChange={(e) => {
+            {...params}
+            onChange={e => {
               if (e.target.value?.length > 3) {
-                setInputGroup(e.target.value);
+                setSearchInput(e.target.value)
               }
             }}
-            {...params}
-            label="Add Groups"
+            label={FIELDS.groups.label}
             variant="outlined"
             error={Boolean(error)}
             helperText={error}
@@ -66,7 +54,7 @@ function SearchGroup() {
         )}
       />
     </>
-  );
+  )
 }
 
-export default SearchGroup;
+export default SearchGroup

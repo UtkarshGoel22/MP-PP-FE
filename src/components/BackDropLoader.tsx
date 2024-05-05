@@ -1,19 +1,22 @@
-import React from 'react';
-import { Backdrop, CircularProgress } from '@material-ui/core';
-import { backdropStyles } from '../styles/style';
+import { useTheme } from "@mui/material/styles"
+import Backdrop from "@mui/material/Backdrop"
+import CircularProgress from "@mui/material/CircularProgress"
 
-type BackDropProps = {
-  open: boolean;
-};
-const BackDropLoader = (props: BackDropProps) => {
-  const backdropClasses = backdropStyles();
+interface BackDropLoaderProps {
+  open: boolean
+}
+
+function BackDropLoader({ open }: BackDropLoaderProps) {
+  const theme = useTheme()
+
   return (
-    <>
-      <Backdrop className={backdropClasses.backdrop} open={props.open}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
-    </>
-  );
-};
+    <Backdrop
+      open={open}
+      sx={{ zIndex: theme.zIndex.drawer + 1, color: "#fff" }}
+    >
+      <CircularProgress color="inherit" />
+    </Backdrop>
+  )
+}
 
-export default BackDropLoader;
+export default BackDropLoader

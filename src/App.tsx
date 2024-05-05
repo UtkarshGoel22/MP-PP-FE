@@ -1,93 +1,76 @@
-import React from 'react';
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
-import './App.css';
-import Dashboard from './components/Dashboard';
-import Footer from './components/Footer';
-import Home from './components/Home';
-import Navbar from './components/Navbar';
-import NotFound from './components/NotFound';
-import Signin from './components/Signin';
-import Signup from './components/Signup';
-import Verify from './components/Verify';
-import { ROUTE } from './constants/route';
-import OpenRoute from './components/OpenRoute';
-import PrivateRoute from './components/PrivateRoute';
-import MyProfile from './components/MyProfile';
-import CreateGroup from './components/CreateGroup';
-import CreatePokerboard from './components/CreatePokerboard';
-import AcceptInvite from './components/AcceptInvite';
-import PokerBoardComponent from './components/PokerBoardComponent';
-import { navStyles, useStyles } from './styles/style';
-import ListGroupForUser from './components/ListGroups/ListGroupForUser';
-import ListTicketForUser from './components/ListTickets/ListTicketForUser';
-import LineGraph from './components/LineGraph';
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
+
+import "@src/App.css"
+import NotFound from "@components/NotFound"
+import OpenRoute from "@components/OpenRoute"
+import PrivateRoute from "@components/PrivateRoute"
+import { ROUTES } from "@constants/routes.const"
+import NavLayout from "@layouts/NavLayout"
+import PokerboardLayout from "@layouts/PokerboardLayout"
+import CreateGroup from "@pages/CreateGroup/index"
+import CreatePokerboard from "@pages/CreatePokerboard/index"
+import Dashboard from "@pages/Dashboard"
+import ImportTickets from "@pages/ImportTickets/index"
+import ListGroups from "@pages/ListGroups"
+import MyProfile from "@pages/MyProfile/index"
+import Signup from "@pages/Signup/index"
+import Signin from "@pages/Signin/index"
+import UserVerification from "@pages/UserVerification/index"
 
 function App() {
-  const navClasses = navStyles();
-  const classes = useStyles();
   return (
     <BrowserRouter>
-      <Switch>
-        <Route exact path={ROUTE.notFound} component={NotFound} />
-        <Route>
-          <div className={navClasses.root}>
-            <Navbar />
-            <main className={classes.content}>
-              <div className={classes.toolbar} />
-              <Switch>
-                <OpenRoute exact path={ROUTE.home} component={Home} />
-                <OpenRoute exact path={ROUTE.signup} component={Signup} />
-                <OpenRoute exact path={ROUTE.signin} component={Signin} />
-                <OpenRoute exact path={ROUTE.verify} component={Verify} />
-                <PrivateRoute
-                  exact
-                  path={ROUTE.dashboard}
-                  component={Dashboard}
-                />
-                <PrivateRoute
-                  exact
-                  path={ROUTE.myProfile}
-                  component={MyProfile}
-                />
-                <PrivateRoute
-                  exact
-                  path={ROUTE.createGroup}
-                  component={CreateGroup}
-                />
-                <PrivateRoute
-                  exact
-                  path={ROUTE.createPokerboard}
-                  component={CreatePokerboard}
-                />
-                <PrivateRoute
-                  path={ROUTE.pokerboard}
-                  component={PokerBoardComponent}
-                />
-                <PrivateRoute
-                  exact
-                  path={ROUTE.acceptInvite}
-                  component={AcceptInvite}
-                />
-                <PrivateRoute
-                  exact
-                  path={ROUTE.groupPage}
-                  component={ListGroupForUser}
-                />
-                <PrivateRoute
-                  exact
-                  path={ROUTE.tickets}
-                  component={ListTicketForUser}
-                />
-                <PrivateRoute exact path={ROUTE.report} component={LineGraph} />
-                <Redirect to={ROUTE.notFound} />
-              </Switch>
-            </main>
-          </div>
-          <Footer />
+      <Routes>
+        <Route path={ROUTES.home} element={<NavLayout />}>
+          <Route index element={<OpenRoute component={<Signin />} />} />
+          <Route
+            path={ROUTES.signin}
+            element={<OpenRoute component={<Signin />} />}
+          />
+          <Route
+            path={ROUTES.signup}
+            element={<OpenRoute component={<Signup />} />}
+          />
+          <Route
+            path={ROUTES.userVerify}
+            element={<OpenRoute component={<UserVerification />} />}
+          />
+          <Route
+            path={ROUTES.myProfile}
+            element={<PrivateRoute component={<MyProfile />} />}
+          />
+          <Route
+            path={ROUTES.createGroup}
+            element={<PrivateRoute component={<CreateGroup />} />}
+          />
+          <Route
+            path={ROUTES.createPokerboard}
+            element={<PrivateRoute component={<CreatePokerboard />} />}
+          />
+          <Route
+            path={ROUTES.dashboard}
+            element={<PrivateRoute component={<Dashboard />} />}
+          />
+          <Route
+            path={ROUTES.groups}
+            element={<PrivateRoute component={<ListGroups />} />}
+          />
+          <Route path={ROUTES.pokerboardDetail} element={<PokerboardLayout />}>
+            <Route
+              index
+              element={<PrivateRoute component={<>PokerboardData</>} />}
+            />
+            <Route
+              path={ROUTES.importTickets}
+              element={<PrivateRoute component={<ImportTickets />} />}
+            />
+          </Route>
+          <Route path="*" element={<Navigate to={ROUTES.notFound} replace />} />
         </Route>
-      </Switch>
+        <Route path={ROUTES.notFound} element={<NotFound />} />
+      </Routes>
     </BrowserRouter>
-  );
+  )
 }
 
-export default App;
+export default App

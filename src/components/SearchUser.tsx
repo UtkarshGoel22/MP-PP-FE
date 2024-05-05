@@ -1,71 +1,60 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
-import { LABEL } from '../constants/constant';
-import {
-  getSearchOption,
-  setSearchUserError,
-  setUserSearchSelectesOptionActionCreator,
-} from '../redux/actions/searchUserActions';
-import { RootState } from '../redux/store';
-import { VALUE } from '../constants/finalConstant';
+import { useEffect, useState } from "react"
 
-export type SearchUserOptionType = {
-  name: string;
-  id: string;
-  email: string;
-  userName: string;
-};
+import Autocomplete from "@mui/material/Autocomplete"
+import TextField from "@mui/material/TextField"
 
-interface searchUserProps {
-  customInput: boolean;
-  widthInput: boolean;
+import { API } from "@constants/api.const"
+import { FIELDS } from "@constants/fields.const"
+import { useAppDispatch, useAppSelector } from "@state/redux/hooks"
+import { userActions } from "@state/redux/userSlice"
+
+interface SearchUserProps {
+  form: any
+  error: string | undefined
+  handleUnregisteredUsers: boolean
 }
 
-const SearchUser = (props: searchUserProps) => {
-  const { customInput, widthInput } = props;
-  const dispatch = useDispatch();
-  const { options, error } = useSelector(
-    (state: RootState) => state.searchUser
-  );
+function SearchUser({ form, error, handleUnregisteredUsers }: SearchUserProps) {
+  const dispatch = useAppDispatch()
+  const { options } = useAppSelector(state => state.user.searchUser)
+  const [searchInput, setSearchInput] = useState("")
 
-  const [searchInput, setInputGroupMember] = useState('');
-
-  /**
-   * Time out of 3 second is added, and fetchResult is only called
-   * when user stops typing (ie, inputGroupMember doesn't change else the timeout is cleared)
-   */
   useEffect(() => {
     let timeout = setTimeout(() => {
-      if (searchInput.length >= 3)
-        dispatch(getSearchOption(searchInput, customInput));
-    }, VALUE.debounceTime);
-    return () => clearTimeout(timeout);
-  }, [searchInput]);
+      if (searchInput.length >= 3) {
+        dispatch(
+          userActions.searchUser({
+            searchInput,
+            handleUnregisteredUsers,
+          }),
+        )
+      }
+    }, API.debounce.userSearch)
+    return () => clearTimeout(timeout)
+  }, [searchInput])
 
   return (
     <>
       <Autocomplete
-        id="combo-box-demo"
         options={options}
-        getOptionSelected={(option, value) => option.email === value.email}
-        multiple={true}
-        onChange={(_, selectedUsers) => {
-          dispatch(setSearchUserError(undefined));
-          dispatch(setUserSearchSelectesOptionActionCreator(selectedUsers));
+        isOptionEqualToValue={(option, value) => option.email === value.email}
+        multiple
+        onChange={(_event, value) => {
+          form.setFieldError(FIELDS.members.name, "")
+          form.setFieldValue(FIELDS.members.name, value)
         }}
-        getOptionLabel={(option) => `${option.name} ${option.email}`}
-        style={{ width: widthInput ? '' : 300 }}
-        renderInput={(params) => (
+        getOptionLabel={option =>
+          `name: "${option.name}", email: "${option.email}"`
+        }
+        renderInput={params => (
           <TextField
-            onChange={(e) => {
+            {...params}
+            onChange={e => {
               if (e.target.value?.length > 3) {
-                setInputGroupMember(e.target.value);
+                setSearchInput(e.target.value)
               }
             }}
-            {...params}
-            label={LABEL.addMembers}
+            label={FIELDS.members.label}
             variant="outlined"
             error={Boolean(error)}
             helperText={error}
@@ -73,7 +62,7 @@ const SearchUser = (props: searchUserProps) => {
         )}
       />
     </>
-  );
-};
+  )
+}
 
-export default SearchUser;
+export default SearchUser
